@@ -1,7 +1,5 @@
 import 'package:path/path.dart';
-// import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
-
 import 'item.dart';
 
 class DatabaseClient {
@@ -9,23 +7,18 @@ class DatabaseClient {
   var db;
   int id=0;
   static List<Map<String, dynamic>> mapsLists=[];
-  // var test = Item(id: 4, name: "test_4");
   String path = join(getDatabasesPath().toString(), 'database.db');
 
 
   // Cette fonction permet de verifier si une base de donnée est déjà créé
   Future<Database?> createDB() async {
     if (await databaseExists(path)) {
-      print("exist");
       database = await openDatabase(path);
       db = database;
-      print(database);
       return database;
     } else {
-      print("no exist");
       database = await create();
       db = database;
-      print(database);
       return database;
     }
   }
@@ -45,8 +38,6 @@ class DatabaseClient {
 
   //Cette fonction permet d'inserer des elements dans la table item de la base de donnée existante
   Future<void> insertItem(Item item) async{
-    print("insert ${db}");
-
    item.id = await db.insert(
       'item',
       item.toMap(),
@@ -56,7 +47,6 @@ class DatabaseClient {
 
 //Cette fonction permet de recuperer les elements de la table item dans une base de donnée existante
   Future<List<Item>> getItem() async {
-    print("object");
     mapsLists = await db.query('item');
     // print(mapsLists);
     return List.generate(mapsLists.length, (index) {
@@ -64,6 +54,7 @@ class DatabaseClient {
     });
   }
 
+//Cette fonction permet de supprimer les elements de la table item dans une base de donnée existante
   Future<void> deleteItem(int id) async{
     await db.delete(
       'item',
@@ -72,6 +63,7 @@ class DatabaseClient {
     );
   }
 
+//Cette fonction permet de modifier la valeur des elements de la table item dans une base de donnée existante
 Future<void> updateItem(Item item) async{
     await db.update(
       'item',

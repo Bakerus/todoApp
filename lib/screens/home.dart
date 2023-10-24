@@ -22,12 +22,7 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    databaseClient.createDB().then(
-      (value) {
-        print(" le nom de la BD est:${DatabaseClient.database}");
-        showItems();
-      },
-    );
+    databaseClient.createDB().then((value) => showItems());
   }
 
   @override
@@ -80,9 +75,11 @@ class _HomeState extends State<Home> {
                                 onPressed: () {
                                   setState(() {
                                     // item = itemsList[i];
-                                    print(item.id);
+                                    // print(item.id);
                                     ajouter(
-                                      function: (item) => databaseClient.updateItem(item).then((value) => showItems()),
+                                        function: (item) => databaseClient
+                                            .updateItem(item)
+                                            .then((value) => showItems()),
                                         id: itemsList[i].id,
                                         title: 'Modifier la tache',
                                         hintText:
@@ -99,8 +96,10 @@ class _HomeState extends State<Home> {
                                   setState(() {
                                     if (itemsList[i].id != null) {
                                       id = itemsList[i].id!;
-                                      print(" the value of id= $id");
-                                      databaseClient.deleteItem(id).then((value) => showItems());
+                                      // print(" the value of id= $id");
+                                      databaseClient
+                                          .deleteItem(id)
+                                          .then((value) => showItems());
                                     }
                                   });
                                 },
@@ -119,7 +118,7 @@ class _HomeState extends State<Home> {
   void ajouter(
       {required String title,
       required String hintText,
-      required Future<void> function(Item item),
+      required Future<void> Function(Item item) function,
       int? id,
       String helperText = ""}) {
     showDialog(
@@ -140,7 +139,7 @@ class _HomeState extends State<Home> {
                 setState(() {
                   nouvelleTache = string;
                 });
-                print(nouvelleTache);
+                // print(nouvelleTache);
               },
             ),
             actions: [
@@ -153,20 +152,19 @@ class _HomeState extends State<Home> {
               ElevatedButton(
                   onPressed: () {
                     if (nouvelleTache.isNotEmpty) {
-                      print("bonjour");
                       setState(() {
                         map['name'] = nouvelleTache;
-                        if(id != null){
-                          map['id'] = id; 
+                        if (id != null) {
+                          map['id'] = id;
                         }
                         item.fromMap(map);
-                        print(item);
+                        // print(item);
                         function(item);
                         nouvelleTache = "";
                       });
                       Navigator.pop(buildContext);
                     } else {
-                      print("no Sumited");
+                      // print("no Sumited");
                     }
                   },
                   child: CustomText('Valider', color: Colors.white))
@@ -190,9 +188,8 @@ class _HomeState extends State<Home> {
     databaseClient.getItem().then((value) {
       setState(() {
         itemsList = value;
-        print(itemsList);
+        // print(itemsList);
       });
     });
   }
-
 }
