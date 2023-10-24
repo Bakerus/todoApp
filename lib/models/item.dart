@@ -2,7 +2,7 @@ class Item {
   int? id;
   String name;
 
-  Item({id, this.name = ""});
+  Item({this.id, this.name = ""});
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = {};

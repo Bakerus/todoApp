@@ -12,16 +12,22 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  String nouvelleTache="";
+  String nouvelleTache = "";
   List<Item> itemsList = [];
   Map<String, dynamic> map = {};
+  var id = 0;
   DatabaseClient databaseClient = DatabaseClient();
   Item item = Item();
 
   @override
   void initState() {
     super.initState();
-    showItems();
+    databaseClient.createDB().then(
+      (value) {
+        print(" le nom de la BD est:${DatabaseClient.database}");
+        showItems();
+      },
+    );
   }
 
   @override
@@ -31,7 +37,12 @@ class _HomeState extends State<Home> {
         title: Text(widget.title),
         actions: [
           TextButton(
-              onPressed: ajouter,
+              onPressed: () => ajouter(
+                  function: (item) => databaseClient
+                      .insertItem(item)
+                      .then((value) => showItems()),
+                  title: 'Ajouter une tache',
+                  hintText: 'Entrer une tache'),
               child: CustomText(
                 "Ajouter",
                 color: Colors.white,
@@ -66,12 +77,33 @@ class _HomeState extends State<Home> {
                               IconButton(
                                 icon: const Icon(Icons.edit),
                                 color: Colors.indigo,
-                                onPressed: () {},
+                                onPressed: () {
+                                  setState(() {
+                                    // item = itemsList[i];
+                                    print(item.id);
+                                    ajouter(
+                                      function: (item) => databaseClient.updateItem(item).then((value) => showItems()),
+                                        id: itemsList[i].id,
+                                        title: 'Modifier la tache',
+                                        hintText:
+                                            'modififier la tache actuelle ',
+                                        helperText:
+                                            'La tache actuelle est: ${itemsList[i].name}');
+                                  });
+                                },
                               ),
                               IconButton(
                                 icon: const Icon(Icons.delete),
                                 color: Colors.red,
-                                onPressed: () {},
+                                onPressed: () {
+                                  setState(() {
+                                    if (itemsList[i].id != null) {
+                                      id = itemsList[i].id!;
+                                      print(" the value of id= $id");
+                                      databaseClient.deleteItem(id).then((value) => showItems());
+                                    }
+                                  });
+                                },
                               )
                             ],
                           ),
@@ -84,19 +116,26 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Future<void> ajouter() async {
-    await showDialog(
+  void ajouter(
+      {required String title,
+      required String hintText,
+      required Future<void> function(Item item),
+      int? id,
+      String helperText = ""}) {
+    showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext buildContext) {
           return AlertDialog(
             title: CustomText(
-              'Ajouter une tache',
+              title,
               color: Colors.indigo,
             ),
             content: TextField(
-              decoration: const InputDecoration(
-                  labelText: 'Tache:', hintText: 'ex:entrer une tache'),
+              decoration: InputDecoration(
+                  labelText: 'à faire',
+                  hintText: hintText,
+                  helperText: helperText),
               onChanged: (String string) {
                 setState(() {
                   nouvelleTache = string;
@@ -117,11 +156,12 @@ class _HomeState extends State<Home> {
                       print("bonjour");
                       setState(() {
                         map['name'] = nouvelleTache;
+                        if(id != null){
+                          map['id'] = id; 
+                        }
                         item.fromMap(map);
                         print(item);
-                        databaseClient
-                            .insertItem(item)
-                            .then((value) => showItems());
+                        function(item);
                         nouvelleTache = "";
                       });
                       Navigator.pop(buildContext);
@@ -147,16 +187,12 @@ class _HomeState extends State<Home> {
   }
 
   void showItems() {
-    databaseClient.createDB().then(
-      (value) {
-        print(" le nom de la BD est:${DatabaseClient.database}");
-        databaseClient.getItem().then((value) {
-          setState(() {
-            itemsList = value;
-            print(itemsList);
-          });
-        });
-      },
-    );
+    databaseClient.getItem().then((value) {
+      setState(() {
+        itemsList = value;
+        print(itemsList);
+      });
+    });
   }
+
 }

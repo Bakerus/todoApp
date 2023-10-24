@@ -8,6 +8,7 @@ class DatabaseClient {
   static Database? database;
   var db;
   int id=0;
+  static List<Map<String, dynamic>> mapsLists=[];
   // var test = Item(id: 4, name: "test_4");
   String path = join(getDatabasesPath().toString(), 'database.db');
 
@@ -56,10 +57,29 @@ class DatabaseClient {
 //Cette fonction permet de recuperer les elements de la table item dans une base de donnée existante
   Future<List<Item>> getItem() async {
     print("object");
-    final List<Map<String, dynamic>> mapsLists = await db.query('item');
-    print(mapsLists);
+    mapsLists = await db.query('item');
+    // print(mapsLists);
     return List.generate(mapsLists.length, (index) {
       return Item(id: mapsLists[index]['id'], name: mapsLists[index]['name']);
     });
   }
+
+  Future<void> deleteItem(int id) async{
+    await db.delete(
+      'item',
+      where: 'id= ?',
+      whereArgs: [id],
+    );
+  }
+
+Future<void> updateItem(Item item) async{
+    await db.update(
+      'item',
+      item.toMap(),
+      where: 'id = ?',
+      whereArgs: [item.id]
+    );
+}
+
+
 }
